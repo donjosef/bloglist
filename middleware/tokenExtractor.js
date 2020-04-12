@@ -1,7 +1,7 @@
 const tokenExtractor = (req, res, next) => {
     const authHeader = req.get('Authorization')
     
-    if (req.method !== 'GET' && !authHeader) {
+    if ((req.method === 'POST' || req.method === 'DELETE') && !authHeader) {
         const error = new Error('Authorization header missing')
         error.name = 'AuthorizationError'
         return next(error)
