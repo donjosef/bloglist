@@ -29,6 +29,11 @@ app.use('/api/users', userController)
 
 app.use('/api/login', loginController)
 
+if(process.env.NODE_ENV === 'test') {
+    const resetTestController = require('./controllers/reset_test')
+    app.use('/api/testing', resetTestController)
+}
+
 app.use(errorMiddleware)
 
 module.exports = app

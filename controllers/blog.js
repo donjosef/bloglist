@@ -13,7 +13,7 @@ blogRouter.get('/', async (req, response) => {
 blogRouter.post('/', async (req, response, next) => {
     let blog;
     let decodedToken;
-    
+
     try {
         decodedToken = jwt.verify(req.token, process.env.JWT_SECRET)
     } catch (err) {
@@ -40,10 +40,11 @@ blogRouter.post('/', async (req, response, next) => {
     }
 
     const savedBlog = await blog.save()
+    const populatedBlog = await savedBlog.populate({path: 'user', select: 'username name'}).execPopulate()
     user.blogs = user.blogs.concat(savedBlog._id)
     await user.save()
 
-    response.status(201).json(savedBlog.toJSON())
+    response.status(201).json(populatedBlog.toJSON())
 })
 
 blogRouter.delete('/:id', async (req, res, next) => {
