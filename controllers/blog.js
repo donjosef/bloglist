@@ -2,6 +2,7 @@ const express = require('express')
 const jwt = require('jsonwebtoken')
 const Blog = require('../models/blog')
 const User = require('../models/user')
+const tokenExtractorMiddleware = require('../middleware/tokenExtractor')
 
 const blogRouter = express.Router()
 
@@ -10,7 +11,7 @@ blogRouter.get('/', async (req, response) => {
     response.json(blogs.map(blog => blog.toJSON()))
 })
 
-blogRouter.post('/', async (req, response, next) => {
+blogRouter.post('/', tokenExtractorMiddleware, async (req, response, next) => {
     let blog;
     let decodedToken;
 
@@ -47,7 +48,21 @@ blogRouter.post('/', async (req, response, next) => {
     response.status(201).json(populatedBlog.toJSON())
 })
 
-blogRouter.delete('/:id', async (req, res, next) => {
+blogRouter.post('/:id/comments', async (req, res, next) => {
+    if(!req.body.comment || req.body.comment.length < 5) {
+        const error = new Error('Comment must be at least 5 characters long')
+        error.name = 'ValidationError'
+        return next(error)
+    }
+    
+    const blog = await Blog.findById(req.params.id)
+    blog.comments = blog.comments.concat(req.body.comment)
+    await blog.save()
+
+    res.status(201).json(blog.toJSON())
+})
+
+blogRouter.delete('/:id', tokenExtractorMiddleware, async (req, res, next) => {
     let decodedToken;
     const blogId = req.params.id;
     const blog = await Blog.findById(blogId)

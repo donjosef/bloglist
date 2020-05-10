@@ -7,7 +7,6 @@ const loginController = require('./controllers/login')
 const logger = require('./utils/logger')
 const {MONGODB_URI} = require('./utils/config')
 const errorMiddleware = require('./middleware/errorMiddleware')
-const tokenExtractorMiddleware = require('./middleware/tokenExtractor')
 
 const app = express()
 
@@ -23,7 +22,7 @@ mongoose
 app.use(cors())
 app.use(express.json())
 
-app.use('/api/blogs', tokenExtractorMiddleware, blogController)
+app.use('/api/blogs', blogController)
 
 app.use('/api/users', userController)
 
